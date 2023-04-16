@@ -220,9 +220,9 @@ class StableDiffusionSDS(nn.Module):
         Returns:
             torch.tensor: Encoded images.
         """
-        imgages = 2 * imgages - 1
+        images = 2 * images - 1
 
-        posterior = self.vae.encode(imgages).latent_dist
+        posterior = self.vae.encode(images).latent_dist
         latents = posterior.sample() * 0.18215
 
         return latents
