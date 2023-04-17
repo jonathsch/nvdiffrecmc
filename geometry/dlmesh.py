@@ -27,6 +27,8 @@ class DLMesh:
         self.initial_guess = initial_guess
         self.mesh = initial_guess.clone()
 
+        self.sds = StableDiffusionSDS()
+
         with torch.no_grad():
             self.optix_ctx = ou.OptiXContext()
 
@@ -94,6 +96,16 @@ class DLMesh:
         #  Compute loss
         # ==============================================================================================
         # Image-space loss, split into a coverage component and a color component
+
+        # SDS Loss
+        col_img = buffers["shaded"][..., 3:]
+        col_img = col_img.permute(0, 3, 1, 2) # BxHxWxC -> BxCxHxW
+
+        img_embbed = self.sds.encode_image(col_img)
+        text_embed = self.sds.encode_text("A photo of a yellow duck")
+
+        img_grad = self.sds.get_latents_gradient(img_embbed, text_embed)
+
 
         # TODO: Replace this with SDS loss
         img_loss = torch.nn.functional.mse_loss(buffers["shaded"][..., 3:], color_ref[..., 3:])
